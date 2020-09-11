@@ -1,0 +1,7 @@
+#!/usr/bin/env ruby
+
+require 'bundler/setup'
+require 'cultural_district_events'
+
+CDE::CLI.new.call
+#no more in this file just in above obect
