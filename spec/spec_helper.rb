@@ -1,5 +1,5 @@
 require "bundler/setup"
-require "hh_performances"
+require "cultural_district_events"
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure
