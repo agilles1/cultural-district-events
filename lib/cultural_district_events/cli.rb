@@ -1,5 +1,6 @@
 #CLI Controller
 class CDE::CLI
+    attr_accessor :current_user
 
     def call 
         CDE::Scraper.new.make_events
@@ -8,14 +9,31 @@ class CDE::CLI
         goodbye
     end 
 
+    def recall
+        welcome
+        view_type_selection
+        goodbye
+    end 
+
     def welcome
+        system("clear")
         puts ""
         puts "----------------------------------------------------------------------------------------------"
         puts "WELCOME TO THE CULTURAL DISTRICT EVENT BROWSER!".center(100)
         puts "----------------------------------------------------------------------------------------------"
-        
-        
+        user_login
     end 
+
+    def user_login
+        puts ""
+        puts 'Please login to continue...'
+        puts "Username: "
+        username = gets.strip
+        puts "Password:"
+        password = gets.strip
+        # end
+        @current_user = CDE::User.create_or_find_by_username_and_password(username, password)
+    end
 
     def view_type_selection
         puts ""
@@ -23,11 +41,12 @@ class CDE::CLI
         puts "1. Events by Presenter"
         puts "2. Events by Venue"
         puts "3. All Cultural District Events"
+        puts "4. Browse History"
         puts ""
-        puts '(enter "exit" at any time to exit the Cultural District Events browser)'
+        puts '(enter "log out" at any time to log out of the Cultural District Events browser)'
         input = nil   
            
-        while input != "exit"
+        while input != "log out"
         input = gets.strip.downcase
 
             if input.to_i == 1
@@ -36,7 +55,9 @@ class CDE::CLI
                 by_venue
             elsif input.to_i == 3
                 event_list
-            elsif input == "exit"
+            elsif input.to_i == 4
+                user_search_history
+            elsif input == "log out"
                 goodbye
             end
 
@@ -55,9 +76,9 @@ class CDE::CLI
         puts "Enter the number for the Presenter who's events you would like to see:"
 
         input = nil
-        while input != "exit"
+        while input != "log out"
         input = gets.strip.downcase
-            if input == "exit"
+            if input == "log out"
                 goodbye  
             elsif input.to_i > 0 && input.to_i <= CDE::Presenter.all.count
                 presenter = CDE::Presenter.all[input.to_i-1]
@@ -80,7 +101,7 @@ class CDE::CLI
         input = nil
 
         input = gets.strip.downcase
-        if input == "exit"
+        if input == "log out"
             goodbye   
         elsif input.to_i > 0 && input.to_i <= CDE::Venue.all.count
         venue = CDE::Venue.all[input.to_i-1]
@@ -122,12 +143,13 @@ class CDE::CLI
         puts "----------------------------------------------------------------------------------------------"
         puts "Enter the number for the event you would like to learn more about:"
         input = nil
-        while input != "exit"
+        while input != "log out"
             
             input = gets.strip.downcase
             
             if input.to_i > 0 && input.to_i <= events_array.count
-                chosen_event = events_array[input.to_i-1] 
+                chosen_event = events_array[input.to_i-1]
+                add_to_current_user_search_history(chosen_event)
                 puts "----------------------------------------------------------------------------------------------"
                 puts ""
                 puts "#{chosen_event.title}".center(100)
@@ -144,18 +166,75 @@ class CDE::CLI
                 puts chosen_event.link
                 puts ""
                 puts "----------------------------------------------------------------------------------------------"
-                puts 'Enter "home" to start a new search or "exit" to leave the Cultural District Event Browser!'
+                puts 'Enter "home" to browse more events.'
             elsif input == "home"
                 view_type_selection
-            elsif input == "exit"
+            elsif input == "log out"
                 goodbye
             end
             
         end
     end
 
+    def add_to_current_user_search_history(chosen_event)
+        @current_user.search_history << chosen_event unless @current_user.search_history.include? chosen_event
+    end
+
+
+    def search_history_menu(events_array)
+        if @current_user.search_history.count == 0
+            puts "Sorry you have no browse history!"
+            view_type_selection
+        else
+            puts 'Enter the number for the event you would like to learn more about or type "home" to browse more events.'
+        input = nil
+        while input != "log out"
+            
+            input = gets.strip.downcase
+            
+            if input.to_i > 0 && input.to_i <= events_array.count
+                chosen_event = events_array[input.to_i-1]
+                puts "----------------------------------------------------------------------------------------------"
+                puts ""
+                puts "#{chosen_event.title}".center(100)
+                puts "presented by #{chosen_event.presenter.name} at #{chosen_event.venue.name}".center(100)
+                puts ""
+                puts "----------------------------------------------------------------------------------------------"
+                puts ""
+                puts "Performance(s):"
+                chosen_event.date_time.each {|dt| puts dt + "\n"}
+                puts ""
+                puts "Genre: #{chosen_event.genre}"
+                puts ""
+                puts "For ticketing and additional details visit:" 
+                puts chosen_event.link
+                puts ""
+                puts "----------------------------------------------------------------------------------------------"
+                puts 'Enter "home" to browse more events or type "back" to go back to your browse history'
+            elsif input == "home"
+                view_type_selection
+            elsif input == "log out"
+                goodbye
+            elsif input == "back"
+                user_search_history
+            end
+            
+        end
+    end
+    end
+    
+    def user_search_history
+        puts "----------------------------------------------------------------------------------------------"
+        puts "#{current_user.username.upcase} Browse History".center(100)
+        puts "----------------------------------------------------------------------------------------------"
+        @current_user.search_history.each.with_index(1) do |event, i|
+            puts "#{i}. #{event.title}"
+        end
+        search_history_menu(@current_user.search_history)
+    end
+
     def goodbye
-        puts "See you next time!"
-        abort
+        system("clear")
+        recall
     end    
 end
