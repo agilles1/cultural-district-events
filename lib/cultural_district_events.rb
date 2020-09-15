@@ -12,5 +12,4 @@ require_relative './cultural_district_events/presenter'
 require_relative './cultural_district_events/venue'
 require_relative './cultural_district_events/user'
 require_relative './cultural_district_events/cli'
-# binding.pry
 

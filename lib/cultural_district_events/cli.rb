@@ -19,7 +19,7 @@ class CDE::CLI
         system("clear")
         puts ""
         puts "----------------------------------------------------------------------------------------------"
-        puts "WELCOME TO THE CULTURAL DISTRICT EVENT BROWSER!".center(100)
+        puts "WELCOME TO THE PITTSBURGH CULTURAL DISTRICT EVENT BROWSER!".center(100)
         puts "----------------------------------------------------------------------------------------------"
         user_login
     end 
