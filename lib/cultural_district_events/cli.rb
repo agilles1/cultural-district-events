@@ -29,9 +29,11 @@ class CDE::CLI
         puts 'Please login to continue...'
         puts "Username: "
         username = gets.strip
+        if username == "TERMINATE!"
+            abort
+        end
         puts "Password:"
         password = gets.strip
-        # end
         @current_user = CDE::User.create_or_find_by_username_and_password(username, password)
     end
 
