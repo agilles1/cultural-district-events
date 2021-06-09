@@ -29,6 +29,10 @@ class CDE::Event
         @@all
     end
 
+    def self.events_by_presenter(presenter)
+        @@all.find_all {|event| event.presenter.name == presenter}
+    end
+
 end
 
 #97 as of 9/2
